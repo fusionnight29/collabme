@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .hidden { display: none; }
+        .subject-item {
+            transition: all 0.2s ease-in-out;
+        }
+        .subject-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div id="app-container">
+
+        <!-- AUTHENTICATION FLOW SCREENS -->
+        <div id="auth-flow" class="min-h-screen flex flex-col items-center justify-center p-4">
+            <!-- Loader -->
+            <div id="loader" class="text-center p-8 hidden">
+                <svg class="animate-spin h-10 w-10 text-indigo-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                <p class="mt-4 text-lg font-medium">Authenticating...</p>
+            </div>
+            <!-- Login -->
+            <div id="login-screen" class="w-full max-w-sm text-center bg-white p-8 rounded-xl shadow-lg">
+                <h1 class="text-3xl font-bold mb-2 text-gray-900">Welcome to Collab</h1>
+                <p class="text-gray-600 mb-6">A shared space for learning.</p>
+                <button id="login-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center transition duration-300 shadow-md">
+                    <svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.222,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C39.986,36.639,44,30.862,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>
+                    Sign In with Google
+                </button>
+            </div>
+            <!-- Pending Approval -->
+            <div id="pending-screen" class="hidden w-full max-w-sm text-center bg-white p-8 rounded-xl shadow-lg">
+                 <h1 class="text-2xl font-bold mb-2 text-gray-900">Pending Approval</h1>
+                 <p class="text-gray-600 mb-6">Your email is not yet approved. Please contact the administrator to get access.</p>
+                 <button id="logout-btn-pending" class="mt-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg transition">Sign Out</button>
+            </div>
+        </div>
+
+        <!-- MAIN APPLICATION -->
+        <div id="main-app" class="hidden">
+            <header class="bg-white shadow-sm sticky top-0 z-10">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+                    <div class="flex items-center">
+                        <i data-lucide="brain-circuit" class="h-8 w-8 text-indigo-600"></i>
+                        <h1 class="ml-3 text-2xl font-bold text-gray-900">Collab</h1>
+                    </div>
+                    <div class="flex items-center">
+                        <span id="user-email-display" class="text-sm text-gray-600 mr-4"></span>
+                        <button id="logout-btn-main" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-semibold py-2 px-4 rounded-lg text-sm transition">Sign Out</button>
+                    </div>
+                </div>
+            </header>
+
+            <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <!-- Add Subject Form -->
+                <div class="bg-white p-6 rounded-xl shadow-md mb-8">
+                    <h2 class="text-xl font-semibold mb-4">Add a New Subject</h2>
+                    <form id="add-subject-form" class="flex items-center space-x-4">
+                        <input type="text" id="subject-name" placeholder="e.g., Physics, History, Programming" required class="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg flex items-center transition shadow-md">
+                            <i data-lucide="plus" class="h-5 w-5 mr-2"></i>
+                            Add Subject
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Subjects List -->
+                <div>
+                    <h2 class="text-2xl font-bold mb-6 text-gray-800">Subjects</h2>
+                    <div id="subjects-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Subject items will be injected here by JavaScript -->
+                    </div>
+                    <p id="no-subjects-message" class="hidden text-center text-gray-500 mt-8 bg-gray-100 py-8 rounded-lg">No subjects have been added yet. Add one above to get started!</p>
+                </div>
+            </main>
+        </div>
+
+    </div>
+
+    <script type="module">
+        // Firebase SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, doc, getDoc, onSnapshot, addDoc, deleteDoc, serverTimestamp, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyA41QF5OwtZpiMKnkbr8BPMUokkhqLbLew",
+            authDomain: "collab-871ae.firebaseapp.com",
+            projectId: "collab-871ae",
+            storageBucket: "collab-871ae.appspot.com",
+            messagingSenderId: "616325837303",
+            appId: "1:616325837303:web:9d81eecba230341793fef2",
+            measurementId: "G-KHR84HWFQR"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- DOM Elements ---
+        const authFlow = document.getElementById('auth-flow');
+        const mainApp = document.getElementById('main-app');
+        const loader = document.getElementById('loader');
+        const loginScreen = document.getElementById('login-screen');
+        const pendingScreen = document.getElementById('pending-screen');
+        
+        const loginBtn = document.getElementById('login-btn');
+        const logoutBtnPending = document.getElementById('logout-btn-pending');
+        const logoutBtnMain = document.getElementById('logout-btn-main');
+
+        const userEmailDisplay = document.getElementById('user-email-display');
+        const addSubjectForm = document.getElementById('add-subject-form');
+        const subjectNameInput = document.getElementById('subject-name');
+        const subjectsContainer = document.getElementById('subjects-container');
+        const noSubjectsMessage = document.getElementById('no-subjects-message');
+
+        let unsubscribeSubjects = null; // To hold the listener function
+
+        // --- UI Control ---
+        function showAuthScreen(screen) {
+            mainApp.classList.add('hidden');
+            authFlow.classList.remove('hidden');
+            loader.classList.add('hidden');
+            loginScreen.classList.add('hidden');
+            pendingScreen.classList.add('hidden');
+            if(screen) screen.classList.remove('hidden');
+        }
+
+        function showMainApp() {
+            authFlow.classList.add('hidden');
+            mainApp.classList.remove('hidden');
+            lucide.createIcons(); // Initialize icons
+        }
+
+        // --- Authentication Logic ---
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                showAuthScreen(loader);
+                checkUserApproval(user);
+            } else {
+                showAuthScreen(loginScreen);
+                if (unsubscribeSubjects) unsubscribeSubjects(); // Detach listener on logout
+            }
+        });
+        
+        async function checkUserApproval(user) {
+            const userDocRef = doc(db, "approvedUsers", user.email);
+            const docSnap = await getDoc(userDocRef);
+            if (docSnap.exists()) {
+                userEmailDisplay.textContent = user.email;
+                showMainApp();
+                listenForSubjects();
+            } else {
+                showAuthScreen(pendingScreen);
+            }
+        }
+
+        loginBtn.addEventListener('click', () => {
+            signInWithPopup(auth, new GoogleAuthProvider()).catch(err => console.error(err));
+        });
+
+        const handleSignOut = () => signOut(auth).catch(err => console.error(err));
+        logoutBtnPending.addEventListener('click', handleSignOut);
+        logoutBtnMain.addEventListener('click', handleSignOut);
+
+
+        // --- Firestore (Phase 1: Subjects) ---
+        const collabCollectionRef = collection(db, "collabData");
+
+        // Add a new subject
+        addSubjectForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const subjectName = subjectNameInput.value.trim();
+            if (subjectName) {
+                try {
+                    await addDoc(collabCollectionRef, {
+                        name: subjectName,
+                        type: 'subject',
+                        parentId: null, // Top-level item
+                        createdAt: serverTimestamp()
+                    });
+                    subjectNameInput.value = '';
+                } catch (error) {
+                    console.error("Error adding subject: ", error);
+                    alert("Could not add subject. Please check console for errors.");
+                }
+            }
+        });
+
+        // Listen for real-time updates on subjects
+        function listenForSubjects() {
+            const subjectsQuery = query(collabCollectionRef, where("type", "==", "subject"), orderBy("createdAt", "asc"));
+            
+            unsubscribeSubjects = onSnapshot(subjectsQuery, (snapshot) => {
+                if (snapshot.empty) {
+                    subjectsContainer.innerHTML = '';
+                    noSubjectsMessage.classList.remove('hidden');
+                    return;
+                }
+                
+                noSubjectsMessage.classList.add('hidden');
+                let html = '';
+                snapshot.docs.forEach(doc => {
+                    const subject = doc.data();
+                    html += `
+                        <div class="subject-item bg-white p-5 rounded-xl shadow-md flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="bg-indigo-100 p-3 rounded-lg mr-4">
+                                    <i data-lucide="book-open" class="h-6 w-6 text-indigo-600"></i>
+                                </div>
+                                <h3 class="text-lg font-semibold text-gray-800">${escapeHTML(subject.name)}</h3>
+                            </div>
+                            <button data-id="${doc.id}" class="delete-subject-btn text-gray-400 hover:text-red-500 p-2 rounded-full transition">
+                                <i data-lucide="trash-2" class="h-5 w-5"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+                subjectsContainer.innerHTML = html;
+                lucide.createIcons();
+            });
+        }
+        
+        // Handle deleting subjects
+        subjectsContainer.addEventListener('click', async (e) => {
+            const deleteButton = e.target.closest('.delete-subject-btn');
+            if (deleteButton) {
+                const docId = deleteButton.dataset.id;
+                const subjectName = deleteButton.parentElement.querySelector('h3').textContent;
+                // A custom modal would be better than confirm(), but this is simpler for Phase 1
+                if (confirm(`Are you sure you want to delete the subject "${subjectName}"? This action cannot be undone.`)) {
+                    try {
+                        await deleteDoc(doc(db, "collabData", docId));
+                    } catch (error) {
+                        console.error("Error deleting subject: ", error);
+                        alert("Could not delete subject.");
+                    }
+                }
+            }
+        });
+
+        function escapeHTML(str) {
+            return str.replace(/[&<>"']/g, function(match) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                }[match];
+            });
+        }
+
+    </script>
+</body>
+</html>
+
