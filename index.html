@@ -7,6 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Add Showdown.js for Markdown parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
         .hidden { display: none; }
@@ -18,6 +20,16 @@
         @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0px); opacity: 1; } }
         .modal-overlay { animation: fadeIn 0.2s ease-out; }
         .modal-content { animation: slideIn 0.2s ease-out; }
+        /* Styles for Markdown content */
+        .prose { line-height: 1.6; }
+        .prose h1, .prose h2, .prose h3 { margin-top: 1.2em; margin-bottom: 0.5em; font-weight: 600; line-height: 1.2; }
+        .prose p { margin-bottom: 0.75em; }
+        .prose ul, .prose ol { margin-left: 1.5em; margin-bottom: 1em; }
+        .prose li { margin-bottom: 0.25em; }
+        .prose a { color: #4f46e5; text-decoration: underline; }
+        .prose strong { font-weight: 600; }
+        .prose em { font-style: italic; }
+        .prose blockquote { border-left: 3px solid #e5e7eb; padding-left: 1em; color: #6b7280; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -61,12 +73,10 @@
         onAuthStateChanged(auth, async (user) => {
             authFlow.classList.remove('hidden');
             mainApp.classList.add('hidden');
-
             if (user) {
                 loader.classList.remove('hidden');
                 loginScreen.classList.add('hidden');
                 pendingScreen.classList.add('hidden');
-                
                 const approvedDoc = await getDoc(doc(db, "approvedUsers", user.email));
                 if (approvedDoc.exists()) {
                      const userProfileDoc = await getDoc(doc(db, "users", user.uid));
@@ -91,16 +101,7 @@
         function promptForDisplayName(user) {
             loader.classList.add('hidden');
             displayNameModal.classList.remove('hidden');
-            displayNameModal.innerHTML = `
-                <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md modal-content">
-                    <h2 class="text-xl font-bold text-gray-900">Welcome! Choose a Display Name</h2>
-                    <p class="mt-2 text-gray-600">This name will be visible to other collaborators.</p>
-                    <form id="display-name-form" class="mt-4 space-y-4">
-                        <input type="text" id="display-name-input" placeholder="Your Name" required class="w-full p-3 border border-gray-300 rounded-lg form-input">
-                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition">Save and Continue</button>
-                    </form>
-                </div>`;
-            
+            displayNameModal.innerHTML = `<div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md modal-content"><h2 class="text-xl font-bold text-gray-900">Welcome! Choose a Display Name</h2><p class="mt-2 text-gray-600">This name will be visible to other collaborators.</p><form id="display-name-form" class="mt-4 space-y-4"><input type="text" id="display-name-input" placeholder="Your Name" required class="w-full p-3 border border-gray-300 rounded-lg form-input"><button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition">Save and Continue</button></form></div>`;
             document.getElementById('display-name-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const displayName = document.getElementById('display-name-input').value.trim();
@@ -125,10 +126,14 @@
             
             mainApp.innerHTML = `
                 <header class="bg-white shadow-sm sticky top-0 z-20">
-                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-                        <div class="flex items-center"><i data-lucide="brain-circuit" class="h-8 w-8 text-indigo-600"></i><h1 class="ml-3 text-2xl font-bold text-gray-900">Collab</h1></div>
-                        <div class="flex items-center">
-                            <span class="text-sm text-gray-600 mr-4 font-semibold">Welcome, ${escapeHTML(currentUser.displayName)}!</span>
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center gap-4">
+                        <div class="flex items-center flex-shrink-0"><i data-lucide="brain-circuit" class="h-8 w-8 text-indigo-600"></i><h1 class="ml-3 text-2xl font-bold text-gray-900">Collab</h1></div>
+                        <div class="relative w-full max-w-lg">
+                            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400"></i>
+                            <input type="search" id="search-input" placeholder="Search current view..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg form-input bg-gray-50">
+                        </div>
+                        <div class="flex items-center flex-shrink-0">
+                            <span class="text-sm text-gray-600 mr-4 font-semibold text-right">Welcome,<br>${escapeHTML(currentUser.displayName)}!</span>
                             <button id="logout-btn-main" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-semibold py-2 px-4 rounded-lg text-sm transition">Sign Out</button>
                         </div>
                     </div>
@@ -139,27 +144,19 @@
                     <div id="topics-view" class="hidden"></div>
                 </main>`;
             
+            const markdownConverter = new showdown.Converter();
             const collabCollectionRef = collection(db, "collabData");
             
             function setView(viewName, data = {}) {
                 document.getElementById('subjects-view').classList.toggle('hidden', viewName !== 'subjects');
                 document.getElementById('chapters-view').classList.toggle('hidden', viewName !== 'chapters');
                 document.getElementById('topics-view').classList.toggle('hidden', viewName !== 'topics');
-                
+                if (document.getElementById('search-input')) document.getElementById('search-input').value = '';
                 Object.values(unsubscribe).forEach(u => u && u());
 
-                if (viewName === 'subjects') {
-                    currentSubject = { id: null, name: null };
-                    currentChapter = { id: null, name: null };
-                    listenForSubjects();
-                } else if (viewName === 'chapters') {
-                    currentSubject = { id: data.subjectId, name: data.subjectName };
-                    currentChapter = { id: null, name: null };
-                    listenForChapters();
-                } else if (viewName === 'topics') {
-                    currentChapter = { id: data.chapterId, name: data.chapterName };
-                    listenForTopics();
-                }
+                if (viewName === 'subjects') { currentSubject = { id: null, name: null }; currentChapter = { id: null, name: null }; listenForSubjects(); }
+                else if (viewName === 'chapters') { currentSubject = { id: data.subjectId, name: data.subjectName }; currentChapter = { id: null, name: null }; listenForChapters(); }
+                else if (viewName === 'topics') { currentChapter = { id: data.chapterId, name: data.chapterName }; listenForTopics(); }
                 lucide.createIcons();
             }
 
@@ -167,28 +164,33 @@
                 const subjectsViewDiv = document.getElementById('subjects-view');
                 const q = query(collabCollectionRef, where("type", "==", "subject"), orderBy("createdAt", "asc"));
                 unsubscribe.subjects = onSnapshot(q, s => {
-                    const content = s.empty ? renderEmptyState("No subjects yet.", "Get started by adding a new subject.") : `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">${s.docs.map(renderSubjectCard).join('')}</div>`;
-                    subjectsViewDiv.innerHTML = `
-                        <div class="bg-white p-6 rounded-xl shadow-md mb-8">
-                            <h2 class="text-xl font-semibold mb-4">Add a New Subject</h2>
-                            <form id="add-subject-form" class="flex items-center space-x-4"><input type="text" id="subject-name-input" placeholder="e.g., Physics, History" required class="flex-grow p-3 border border-gray-300 rounded-lg form-input"><button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg flex items-center transition shadow-md"><i data-lucide="plus" class="h-5 w-5 mr-2"></i>Add Subject</button></form>
-                        </div>
-                        <div><h2 class="text-2xl font-bold mb-6 text-gray-800">Subjects</h2>${content}</div>`;
-                    lucide.createIcons();
+                    const allDocs = s.docs;
+                    const render = () => {
+                        const searchTerm = document.getElementById('search-input').value.toLowerCase();
+                        const filteredDocs = allDocs.filter(doc => doc.data().name.toLowerCase().includes(searchTerm));
+                        const content = filteredDocs.length === 0 ? renderEmptyState("No subjects found.", "Try another search, or add a new one.") : `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">${filteredDocs.map(renderSubjectCard).join('')}</div>`;
+                        subjectsViewDiv.innerHTML = `<div class="bg-white p-6 rounded-xl shadow-md mb-8"><h2 class="text-xl font-semibold mb-4">Add a New Subject</h2><form id="add-subject-form" class="flex items-center space-x-4"><input type="text" id="subject-name-input" placeholder="e.g., Physics, History" required class="flex-grow p-3 border border-gray-300 rounded-lg form-input"><button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg flex items-center transition shadow-md"><i data-lucide="plus" class="h-5 w-5 mr-2"></i>Add Subject</button></form></div><div><h2 class="text-2xl font-bold mb-6 text-gray-800">Subjects</h2>${content}</div>`;
+                        lucide.createIcons();
+                    };
+                    render();
+                    document.getElementById('search-input').addEventListener('input', render);
                 });
             }
 
             function listenForChapters() {
-                 const chaptersViewDiv = document.getElementById('chapters-view');
+                const chaptersViewDiv = document.getElementById('chapters-view');
                 const q = query(collabCollectionRef, where("type", "==", "chapter"), where("parentId", "==", currentSubject.id), orderBy("createdAt", "asc"));
                 unsubscribe.chapters = onSnapshot(q, s => {
-                    const content = s.empty ? renderEmptyState("No chapters here.", "Add one to get started.") : `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">${s.docs.map(renderChapterCard).join('')}</div>`;
-                    chaptersViewDiv.innerHTML = `
-                        <button id="back-to-subjects-btn" class="mb-6 inline-flex items-center text-indigo-600 hover:text-indigo-800 font-semibold transition"><i data-lucide="arrow-left" class="h-5 w-5 mr-2"></i>Back to Subjects</button>
-                        <h2 class="text-3xl font-bold mb-2">Subject: <span class="text-indigo-600">${escapeHTML(currentSubject.name)}</span></h2><hr class="my-6">
-                        <div class="bg-white p-6 rounded-xl shadow-md mb-8"><h3 class="text-xl font-semibold mb-4">Add a New Chapter</h3><form id="add-chapter-form" class="flex items-center space-x-4"><input type="text" id="chapter-name-input" placeholder="e.g., Introduction" required class="flex-grow p-3 border border-gray-300 rounded-lg form-input"><button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-md">Add Chapter</button></form></div>
-                        <div><h3 class="text-2xl font-bold mb-6">Chapters</h3>${content}</div>`;
-                    lucide.createIcons();
+                    const allDocs = s.docs;
+                     const render = () => {
+                        const searchTerm = document.getElementById('search-input').value.toLowerCase();
+                        const filteredDocs = allDocs.filter(doc => doc.data().name.toLowerCase().includes(searchTerm));
+                        const content = filteredDocs.length === 0 ? renderEmptyState("No chapters here.", "Add one to get started.") : `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">${filteredDocs.map(renderChapterCard).join('')}</div>`;
+                        chaptersViewDiv.innerHTML = `<button id="back-to-subjects-btn" class="mb-6 inline-flex items-center text-indigo-600 hover:text-indigo-800 font-semibold transition"><i data-lucide="arrow-left" class="h-5 w-5 mr-2"></i>Back to Subjects</button><h2 class="text-3xl font-bold mb-2">Subject: <span class="text-indigo-600">${escapeHTML(currentSubject.name)}</span></h2><hr class="my-6"><div class="bg-white p-6 rounded-xl shadow-md mb-8"><h3 class="text-xl font-semibold mb-4">Add a New Chapter</h3><form id="add-chapter-form" class="flex items-center space-x-4"><input type="text" id="chapter-name-input" placeholder="e.g., Introduction" required class="flex-grow p-3 border border-gray-300 rounded-lg form-input"><button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-md">Add Chapter</button></form></div><div><h3 class="text-2xl font-bold mb-6">Chapters</h3>${content}</div>`;
+                        lucide.createIcons();
+                    };
+                    render();
+                    document.getElementById('search-input').addEventListener('input', render);
                 });
             }
 
@@ -196,48 +198,41 @@
                 const topicsViewDiv = document.getElementById('topics-view');
                 const q = query(collabCollectionRef, where("type", "==", "topic"), where("parentId", "==", currentChapter.id), orderBy("createdAt", "asc"));
                 unsubscribe.topics = onSnapshot(q, s => {
-                    const content = s.empty ? renderEmptyState("No topics in this chapter.", "Add a topic to start learning.") : `<div class="space-y-6">${s.docs.map(d => renderTopic(d.id, d.data())).join('')}</div>`;
-                    topicsViewDiv.innerHTML = `
-                        <div class="mb-6 flex items-center text-gray-500 text-sm">
-                            <button data-view="subjects" class="hover:underline">Subjects</button>
-                            <i data-lucide="chevron-right" class="h-4 w-4 mx-1"></i>
-                            <button data-view="chapters" data-subjectid="${currentSubject.id}" data-subjectname="${escapeHTML(currentSubject.name)}" class="hover:underline">${escapeHTML(currentSubject.name)}</button>
-                        </div>
-                        <h2 class="text-3xl font-bold mb-2">Chapter: <span class="text-indigo-600">${escapeHTML(currentChapter.name)}</span></h2><hr class="my-6">
-                        <div class="bg-white p-6 rounded-xl shadow-md mb-8"><h3 class="text-xl font-semibold mb-4">Add a New Topic</h3><form id="add-topic-form" class="space-y-4"><input type="text" id="topic-name-input" placeholder="Topic Title" required class="w-full p-3 border border-gray-300 rounded-lg form-input"><textarea id="topic-content-input" placeholder="Enter notes, website link, or YouTube link" required rows="4" class="w-full p-3 border border-gray-300 rounded-lg form-input"></textarea><button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-md">Add Topic</button></form></div>
-                        <div><h3 class="text-2xl font-bold mb-6">Topics</h3>${content}</div>`;
-                    lucide.createIcons();
+                    const allDocs = s.docs;
+                    const render = () => {
+                        const searchTerm = document.getElementById('search-input').value.toLowerCase();
+                        const filteredDocs = allDocs.filter(doc => doc.data().name.toLowerCase().includes(searchTerm) || doc.data().content.toLowerCase().includes(searchTerm));
+                        const content = filteredDocs.length === 0 ? renderEmptyState("No topics found.", "Try another search or add a new topic.") : `<div class="space-y-6">${filteredDocs.map(d => renderTopic(d.id, d.data())).join('')}</div>`;
+                        topicsViewDiv.innerHTML = `<div class="mb-6 flex items-center text-gray-500 text-sm"><button data-view="subjects" class="hover:underline">Subjects</button><i data-lucide="chevron-right" class="h-4 w-4 mx-1"></i><button data-view="chapters" data-subjectid="${currentSubject.id}" data-subjectname="${escapeHTML(currentSubject.name)}" class="hover:underline">${escapeHTML(currentSubject.name)}</button></div><h2 class="text-3xl font-bold mb-2">Chapter: <span class="text-indigo-600">${escapeHTML(currentChapter.name)}</span></h2><hr class="my-6"><div class="bg-white p-6 rounded-xl shadow-md mb-8"><h3 class="text-xl font-semibold mb-4">Add a New Topic</h3><form id="add-topic-form" class="space-y-4"><input type="text" id="topic-name-input" placeholder="Topic Title" required class="w-full p-3 border border-gray-300 rounded-lg form-input"><textarea id="topic-content-input" placeholder="Enter notes, website link, or YouTube link..." required rows="5" class="w-full p-3 border border-gray-300 rounded-lg form-input"></textarea><p class="text-xs text-gray-500 -mt-2 !mt-1">Styling with <a href="https://www.markdownguide.org/basic-syntax/" target="_blank" class="text-indigo-600 underline">Markdown</a> is supported.</p><button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-md">Add Topic</button></form></div><div><h3 class="text-2xl font-bold mb-6">Topics</h3>${content}</div>`;
+                        lucide.createIcons();
+                    };
+                    render();
+                    document.getElementById('search-input').addEventListener('input', render);
                 });
             }
             
-            const renderEmptyState = (title, subtitle) => `<div class="text-center text-gray-500 mt-8 bg-gray-100 py-12 rounded-lg"><i data-lucide="folder-open" class="h-12 w-12 mx-auto text-gray-400"></i><h3 class="mt-4 text-xl font-semibold">${title}</h3><p class="mt-1">${subtitle}</p></div>`;
+            const renderEmptyState = (title, subtitle) => `<div class="text-center text-gray-500 mt-8 bg-white py-12 rounded-lg shadow-md"><i data-lucide="folder-search" class="h-12 w-12 mx-auto text-gray-400"></i><h3 class="mt-4 text-xl font-semibold">${title}</h3><p class="mt-1">${subtitle}</p></div>`;
             const renderSubjectCard = doc => {
                 const data = doc.data();
                 const contributors = data.contributors || [];
                 const contributorAvatars = contributors.slice(0, 5).map(name => `<span title="${escapeHTML(name)}" class="h-7 w-7 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-xs ring-2 ring-white">${name.charAt(0).toUpperCase()}</span>`).join('');
-                return `
-                    <div data-id="${doc.id}" data-name="${escapeHTML(data.name)}" class="subject-card clickable-card bg-white p-5 rounded-xl shadow-md cursor-pointer">
-                        <div class="flex justify-between items-start">
-                           <div class="flex items-center">
-                                <div class="bg-indigo-100 p-3 rounded-lg mr-4"><i data-lucide="book-open" class="h-6 w-6 text-indigo-600"></i></div>
-                                <h3 class="text-lg font-semibold">${escapeHTML(data.name)}</h3>
-                            </div>
-                            <button data-id="${doc.id}" class="delete-btn text-gray-400 hover:text-red-500 p-2 rounded-full -mt-2 -mr-2 transition"><i data-lucide="trash-2" class="h-5 w-5"></i></button>
-                        </div>
-                        <div class="mt-4 pt-4 border-t border-gray-100">
-                            <div class="flex items-center text-xs text-gray-500">
-                                <i data-lucide="users" class="h-4 w-4 mr-2 text-gray-400"></i>
-                                <div class="flex items-center -space-x-2">${contributorAvatars}</div>
-                                ${contributors.length > 5 ? `<span class="ml-3 text-gray-500 font-medium">+${contributors.length - 5} more</span>` : ''}
-                            </div>
-                        </div>
-                    </div>`;
+                return `<div data-id="${doc.id}" data-name="${escapeHTML(data.name)}" class="subject-card clickable-card bg-white p-5 rounded-xl shadow-md cursor-pointer"><div class="flex justify-between items-start"><div class="flex items-center"><div class="bg-indigo-100 p-3 rounded-lg mr-4"><i data-lucide="book-open" class="h-6 w-6 text-indigo-600"></i></div><h3 class="text-lg font-semibold">${escapeHTML(data.name)}</h3></div><button data-id="${doc.id}" class="delete-btn text-gray-400 hover:text-red-500 p-2 rounded-full -mt-2 -mr-2 transition"><i data-lucide="trash-2" class="h-5 w-5 pointer-events-none"></i></button></div><div class="mt-4 pt-4 border-t border-gray-100"><div class="flex items-center text-xs text-gray-500"><i data-lucide="users" class="h-4 w-4 mr-2 text-gray-400"></i><div class="flex items-center -space-x-2">${contributorAvatars}</div>${contributors.length > 5 ? `<span class="ml-3 text-gray-500 font-medium">+${contributors.length - 5} more</span>` : ''}</div></div></div>`;
             };
-
-            const renderChapterCard = doc => { /* Similar to subject card */ return ''; };
-            const renderTopic = (id, data) => { /* Topic rendering */ return ''; };
-            const renderContent = content => { /* Content rendering */ return ''; };
-            const getYoutubeId = url => { /* YouTube ID logic */ return null; };
+            const renderChapterCard = doc => {
+                const data = doc.data();
+                const contributors = data.contributors || [];
+                const contributorAvatars = contributors.slice(0, 5).map(name => `<span title="${escapeHTML(name)}" class="h-7 w-7 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-xs ring-2 ring-white">${name.charAt(0).toUpperCase()}</span>`).join('');
+                return `<div data-id="${doc.id}" data-name="${escapeHTML(data.name)}" class="chapter-card clickable-card bg-white p-5 rounded-xl shadow-md cursor-pointer"><div class="flex justify-between items-start"><div class="flex items-center"><div class="bg-gray-100 p-3 rounded-lg mr-4"><i data-lucide="file-text" class="h-6 w-6 text-gray-600"></i></div><h4 class="text-lg font-semibold">${escapeHTML(data.name)}</h4></div><button data-id="${doc.id}" class="delete-btn text-gray-400 hover:text-red-500 p-2 rounded-full -mt-2 -mr-2 transition"><i data-lucide="trash-2" class="h-5 w-5 pointer-events-none"></i></button></div><div class="mt-4 pt-4 border-t border-gray-100"><div class="flex items-center text-xs text-gray-500"><i data-lucide="users" class="h-4 w-4 mr-2 text-gray-400"></i><div class="flex items-center -space-x-2">${contributorAvatars}</div>${contributors.length > 5 ? `<span class="ml-3 text-gray-500 font-medium">+${contributors.length - 5} more</span>` : ''}</div></div></div>`;
+            };
+            const renderTopic = (id, data) => `<div class="bg-white p-6 rounded-lg shadow-sm"><div class="flex justify-between items-start mb-4"><h4 class="text-xl font-bold">${escapeHTML(data.name)}</h4><button data-id="${id}" class="delete-btn text-gray-400 hover:text-red-500 p-2 rounded-full -mt-2 -mr-2"><i data-lucide="trash-2" class="h-5 w-5 pointer-events-none"></i></button></div>${renderContent(data.content)}</div>`;
+            const renderContent = content => {
+                const youtubeId = getYoutubeId(content);
+                if (youtubeId) return `<div class="aspect-video"><iframe src="https://www.youtube.com/embed/${youtubeId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="w-full h-full rounded-lg"></iframe></div>`;
+                if (content.match(/^https?:\/\//)) return `<a href="${escapeHTML(content)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center bg-blue-100 text-blue-700 font-semibold py-2 px-4 rounded-lg hover:bg-blue-200 transition break-all"><i data-lucide="link" class="h-4 w-4 mr-2 flex-shrink-0"></i>${escapeHTML(content)}</a>`;
+                const htmlContent = markdownConverter.makeHtml(content);
+                return `<div class="prose max-w-none">${htmlContent}</div>`;
+            };
+            const getYoutubeId = url => url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/)?. [2]?.length === 11 ? url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/)[2] : null;
 
             mainApp.addEventListener('submit', async (e) => {
                 if (!currentUser) return;
@@ -248,13 +243,30 @@
             });
 
             mainApp.addEventListener('click', e => {
-                if(e.target.closest('#logout-btn-main')) { signOut(auth); }
+                if(e.target.closest('#logout-btn-main')) { signOut(auth); return; }
                 const subjectCard = e.target.closest('.subject-card');
+                const chapterCard = e.target.closest('.chapter-card');
                 const deleteBtn = e.target.closest('.delete-btn');
-                if (subjectCard && !deleteBtn) { setView('chapters', { subjectId: subjectCard.dataset.id, subjectName: subjectCard.dataset.name }); }
-                if (e.target.closest('#back-to-subjects-btn') || (e.target.closest('button[data-view="subjects"]'))) { setView('subjects'); }
-                // ... other click logic for chapters, topics, delete ...
+                
+                if (deleteBtn) { itemToDeleteId = deleteBtn.dataset.id; deleteModal.classList.remove('hidden'); deleteModal.innerHTML = `<div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md modal-content"><div class="flex items-start"><div class="flex-shrink-0 bg-red-100 rounded-full p-3 mr-4"><i data-lucide="alert-triangle" class="h-6 w-6 text-red-600"></i></div><div><h2 class="text-xl font-bold text-gray-900">Delete Item</h2><p class="mt-2 text-gray-600">Are you sure? All content inside will be permanently removed. This action cannot be undone.</p></div></div><div class="mt-6 flex justify-end space-x-3"><button id="cancel-delete-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-5 rounded-lg transition">Cancel</button><button id="confirm-delete-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-5 rounded-lg transition">Delete</button></div></div>`; lucide.createIcons(); return; }
+                if(e.target.id === 'cancel-delete-btn' || e.target.closest('#cancel-delete-btn')) { deleteModal.classList.add('hidden'); itemToDeleteId = null; return; }
+                if(e.target.id === 'confirm-delete-btn' || e.target.closest('#confirm-delete-btn')) { handleDelete(itemToDeleteId); return; }
+
+                if (subjectCard) { setView('chapters', { subjectId: subjectCard.dataset.id, subjectName: subjectCard.dataset.name }); }
+                else if (chapterCard) { setView('topics', { chapterId: chapterCard.dataset.id, chapterName: chapterCard.dataset.name }); }
+                else if (e.target.closest('#back-to-subjects-btn') || e.target.closest('button[data-view="subjects"]')) { setView('subjects'); }
+                else if (e.target.closest('button[data-view="chapters"]')) { const btn = e.target.closest('button[data-view="chapters"]'); setView('chapters', { subjectId: btn.dataset.subjectid, subjectName: btn.dataset.subjectname }); }
             });
+
+            async function handleDelete(id) {
+                if (!id) return;
+                const batch = writeBatch(db);
+                const q1 = query(collabCollectionRef, where('parentId', '==', id)); const c1 = await getDocs(q1);
+                for (const doc1 of c1.docs) { const q2 = query(collabCollectionRef, where('parentId', '==', doc1.id)); const c2 = await getDocs(q2); c2.forEach(doc2 => batch.delete(doc2.ref)); batch.delete(doc1.ref); }
+                batch.delete(doc(db, "collabData", id));
+                await batch.commit();
+                deleteModal.classList.add('hidden'); itemToDeleteId = null;
+            }
             
             setView('subjects');
         }
