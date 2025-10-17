@@ -83,7 +83,14 @@
                         promptForDisplayName(user);
                         return; 
                     } else {
-                        currentUser = { uid: user.uid, email: user.email, displayName: user.email.split('@')[0], role: 'viewer' };
+                        // FIX: Save the default user profile to Firestore
+                        const defaultUserProfile = { 
+                            email: user.email, 
+                            displayName: user.email.split('@')[0], 
+                            role: 'viewer' 
+                        };
+                        await setDoc(doc(db, "users", user.uid), defaultUserProfile);
+                        currentUser = { uid: user.uid, ...defaultUserProfile };
                     }
                 }
             } else {
