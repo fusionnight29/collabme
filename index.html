@@ -8,71 +8,72 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
+        body { font-family: 'Inter', sans-serif; }
         .hidden { display: none; }
-        .clickable-card {
-            transition: all 0.2s ease-in-out;
-            cursor: pointer;
-        }
-        .clickable-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
+        .clickable-card { transition: all 0.2s ease-in-out; cursor: pointer; }
+        .clickable-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        /* Style for the custom file input button */
+        input[type="file"] { display: none; }
+        .custom-file-upload { border: 1px solid #ccc; display: inline-block; padding: 6px 12px; cursor: pointer; background-color: #f8f9fa; border-radius: 0.5rem; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
 
     <div id="app-container">
-
-        <!-- AUTHENTICATION (No changes from Phase 1) -->
+        <!-- AUTHENTICATION (No changes) -->
         <div id="auth-flow" class="min-h-screen flex flex-col items-center justify-center p-4">
             <div id="loader" class="text-center p-8 hidden"><svg class="animate-spin h-10 w-10 text-indigo-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><p class="mt-4 text-lg font-medium">Authenticating...</p></div>
-            <div id="login-screen" class="w-full max-w-sm text-center bg-white p-8 rounded-xl shadow-lg"><h1 class="text-3xl font-bold mb-2 text-gray-900">Welcome to Collab</h1><p class="text-gray-600 mb-6">A shared space for learning.</p><button id="login-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center transition duration-300 shadow-md"><svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.222,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C39.986,36.639,44,30.862,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>Sign In with Google</button></div>
-            <div id="pending-screen" class="hidden w-full max-w-sm text-center bg-white p-8 rounded-xl shadow-lg"><h1 class="text-2xl font-bold mb-2 text-gray-900">Pending Approval</h1><p class="text-gray-600 mb-6">Your email is not yet approved. Please contact the administrator to get access.</p><button id="logout-btn-pending" class="mt-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg transition">Sign Out</button></div>
+            <div id="login-screen" class="w-full max-w-sm text-center bg-white p-8 rounded-xl shadow-lg"><h1 class="text-3xl font-bold mb-2 text-gray-900">Welcome to Collab</h1><p class="text-gray-600 mb-6">A shared space for learning.</p<button id="login-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center transition duration-300 shadow-md"><svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.222,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C39.986,36.639,44,30.862,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>Sign In with Google</button></div>
+            <div id="pending-screen" class="hidden w-full max-w-sm text-center bg-white p-8 rounded-xl shadow-lg"><h1 class="text-2xl font-bold mb-2 text-gray-900">Pending Approval</h1><p class="text-gray-600 mb-6">Your email is not yet approved.</p><button id="logout-btn-pending" class="mt-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg transition">Sign Out</button></div>
         </div>
 
         <!-- MAIN APPLICATION -->
         <div id="main-app" class="hidden">
             <header class="bg-white shadow-sm sticky top-0 z-10">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-                    <div class="flex items-center"><i data-lucide="brain-circuit" class="h-8 w-8 text-indigo-600"></i><h1 class="ml-3 text-2xl font-bold text-gray-900">Collab</h1></div>
-                    <div class="flex items-center"><span id="user-email-display" class="text-sm text-gray-600 mr-4"></span><button id="logout-btn-main" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-semibold py-2 px-4 rounded-lg text-sm transition">Sign Out</button></div>
-                </div>
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center"><div class="flex items-center"><i data-lucide="brain-circuit" class="h-8 w-8 text-indigo-600"></i><h1 class="ml-3 text-2xl font-bold text-gray-900">Collab</h1></div><div class="flex items-center"><span id="user-email-display" class="text-sm text-gray-600 mr-4"></span><button id="logout-btn-main" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-semibold py-2 px-4 rounded-lg text-sm transition">Sign Out</button></div></div>
             </header>
 
             <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-                <!-- View: Subjects List (Phase 1) -->
+                <!-- View: Subjects List -->
                 <div id="subjects-view">
                     <div class="bg-white p-6 rounded-xl shadow-md mb-8">
                         <h2 class="text-xl font-semibold mb-4">Add a New Subject</h2>
                         <form id="add-subject-form" class="flex items-center space-x-4"><input type="text" id="subject-name-input" placeholder="e.g., Physics, History, Programming" required class="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition"><button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg flex items-center transition shadow-md"><i data-lucide="plus" class="h-5 w-5 mr-2"></i>Add Subject</button></form>
                     </div>
-                    <div>
-                        <h2 class="text-2xl font-bold mb-6 text-gray-800">Subjects</h2>
-                        <div id="subjects-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-                        <p id="no-subjects-message" class="hidden text-center text-gray-500 mt-8 bg-gray-100 py-8 rounded-lg">No subjects have been added yet.</p>
+                    <!-- Import/Export Section -->
+                    <div class="bg-white p-6 rounded-xl shadow-md mb-8">
+                        <h2 class="text-xl font-semibold mb-4">Manage Data</h2>
+                        <div class="flex items-center space-x-4">
+                            <button id="export-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg flex items-center transition"><i data-lucide="download" class="h-5 w-5 mr-2"></i>Export to JSON</button>
+                            <label for="import-file" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center transition cursor-pointer"><i data-lucide="upload" class="h-5 w-5 mr-2"></i>Import from JSON</label>
+                            <input type="file" id="import-file" accept=".json">
+                        </div>
                     </div>
+                    <div><h2 class="text-2xl font-bold mb-6 text-gray-800">Subjects</h2><div id="subjects-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div><p id="no-subjects-message" class="hidden text-center text-gray-500 mt-8 bg-gray-100 py-8 rounded-lg">No subjects have been added yet.</p></div>
                 </div>
 
-                <!-- View: Chapters List (Phase 2) -->
+                <!-- View: Chapters List -->
                 <div id="chapters-view" class="hidden">
                     <button id="back-to-subjects-btn" class="mb-6 inline-flex items-center text-indigo-600 hover:text-indigo-800 font-semibold transition"><i data-lucide="arrow-left" class="h-5 w-5 mr-2"></i>Back to Subjects</button>
-                    <h2 class="text-3xl font-bold mb-2">Subject: <span id="current-subject-name" class="text-indigo-600"></span></h2>
-                    <hr class="my-6">
-                    <div class="bg-white p-6 rounded-xl shadow-md mb-8">
-                        <h3 class="text-xl font-semibold mb-4">Add a New Chapter</h3>
-                        <form id="add-chapter-form" class="flex items-center space-x-4"><input type="text" id="chapter-name-input" placeholder="e.g., Introduction, Core Concepts" required class="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition"><button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg flex items-center transition shadow-md"><i data-lucide="plus" class="h-5 w-5 mr-2"></i>Add Chapter</button></form>
-                    </div>
-                    <div>
-                        <h3 class="text-2xl font-bold mb-6 text-gray-800">Chapters</h3>
-                        <div id="chapters-container" class="space-y-4"></div>
-                        <p id="no-chapters-message" class="hidden text-center text-gray-500 mt-8 bg-gray-100 py-8 rounded-lg">No chapters here. Add one to get started!</p>
-                    </div>
+                    <h2 class="text-3xl font-bold mb-2">Subject: <span id="current-subject-name" class="text-indigo-600"></span></h2><hr class="my-6">
+                    <div class="bg-white p-6 rounded-xl shadow-md mb-8"><h3 class="text-xl font-semibold mb-4">Add a New Chapter</h3><form id="add-chapter-form" class="flex items-center space-x-4"><input type="text" id="chapter-name-input" placeholder="e.g., Introduction, Core Concepts" required class="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition"><button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg flex items-center transition shadow-md"><i data-lucide="plus" class="h-5 w-5 mr-2"></i>Add Chapter</button></form></div>
+                    <div><h3 class="text-2xl font-bold mb-6 text-gray-800">Chapters</h3><div id="chapters-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div><p id="no-chapters-message" class="hidden text-center text-gray-500 mt-8 bg-gray-100 py-8 rounded-lg">No chapters here.</p></div>
                 </div>
-
+                
+                <!-- View: Topics List (Phase 3) -->
+                <div id="topics-view" class="hidden">
+                    <div id="breadcrumbs" class="mb-6 flex items-center text-gray-500 text-sm"></div>
+                    <h2 class="text-3xl font-bold mb-2">Chapter: <span id="current-chapter-name" class="text-indigo-600"></span></h2><hr class="my-6">
+                    <div class="bg-white p-6 rounded-xl shadow-md mb-8">
+                        <h3 class="text-xl font-semibold mb-4">Add a New Topic</h3>
+                        <form id="add-topic-form" class="space-y-4">
+                            <input type="text" id="topic-name-input" placeholder="Topic Title" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition">
+                            <textarea id="topic-content-input" placeholder="Enter notes, a website link (e.g., https://...), or a YouTube link (e.g., https://www.youtube.com/watch?v=...)" required rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition"></textarea>
+                            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg flex items-center transition shadow-md"><i data-lucide="plus" class="h-5 w-5 mr-2"></i>Add Topic</button>
+                        </form>
+                    </div>
+                    <div><h3 class="text-2xl font-bold mb-6 text-gray-800">Topics</h3><div id="topics-container" class="space-y-6"></div><p id="no-topics-message" class="hidden text-center text-gray-500 mt-8 bg-gray-100 py-8 rounded-lg">No topics yet.</p></div>
+                </div>
             </main>
         </div>
     </div>
@@ -80,7 +81,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, collection, doc, getDoc, onSnapshot, addDoc, deleteDoc, serverTimestamp, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, collection, doc, getDoc, onSnapshot, addDoc, deleteDoc, serverTimestamp, query, where, orderBy, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyA41QF5OwtZpiMKnkbr8BPMUokkhqLbLew", authDomain: "collab-871ae.firebaseapp.com", projectId: "collab-871ae", storageBucket: "collab-871ae.appspot.com", messagingSenderId: "616325837303", appId: "1:616325837303:web:9d81eecba230341793fef2", measurementId: "G-KHR84HWFQR" };
 
@@ -89,74 +90,43 @@
         const db = getFirestore(app);
 
         // --- Global State ---
-        let currentView = 'subjects'; // 'subjects' or 'chapters'
+        let currentView = 'subjects';
         let currentSubject = { id: null, name: null };
-        let unsubscribeSubjects = null;
-        let unsubscribeChapters = null;
+        let currentChapter = { id: null, name: null };
+        let unsubscribe = { subjects: null, chapters: null, topics: null };
 
         // --- DOM Elements ---
-        const authFlow = document.getElementById('auth-flow'), mainApp = document.getElementById('main-app');
-        const loader = document.getElementById('loader'), loginScreen = document.getElementById('login-screen'), pendingScreen = document.getElementById('pending-screen');
-        const loginBtn = document.getElementById('login-btn'), logoutBtnPending = document.getElementById('logout-btn-pending'), logoutBtnMain = document.getElementById('logout-btn-main');
-        const userEmailDisplay = document.getElementById('user-email-display');
-        
-        // Views
-        const subjectsView = document.getElementById('subjects-view');
-        const chaptersView = document.getElementById('chapters-view');
+        const authFlow = document.getElementById('auth-flow'), mainApp = document.getElementById('main-app'), loader = document.getElementById('loader'), loginScreen = document.getElementById('login-screen'), pendingScreen = document.getElementById('pending-screen'), loginBtn = document.getElementById('login-btn'), logoutBtnPending = document.getElementById('logout-btn-pending'), logoutBtnMain = document.getElementById('logout-btn-main'), userEmailDisplay = document.getElementById('user-email-display');
+        const subjectsView = document.getElementById('subjects-view'), chaptersView = document.getElementById('chapters-view'), topicsView = document.getElementById('topics-view');
+        const addSubjectForm = document.getElementById('add-subject-form'), subjectNameInput = document.getElementById('subject-name-input'), subjectsContainer = document.getElementById('subjects-container'), noSubjectsMessage = document.getElementById('no-subjects-message');
+        const backToSubjectsBtn = document.getElementById('back-to-subjects-btn'), currentSubjectName = document.getElementById('current-subject-name'), addChapterForm = document.getElementById('add-chapter-form'), chapterNameInput = document.getElementById('chapter-name-input'), chaptersContainer = document.getElementById('chapters-container'), noChaptersMessage = document.getElementById('no-chapters-message');
+        const breadcrumbs = document.getElementById('breadcrumbs'), currentChapterName = document.getElementById('current-chapter-name'), addTopicForm = document.getElementById('add-topic-form'), topicNameInput = document.getElementById('topic-name-input'), topicContentInput = document.getElementById('topic-content-input'), topicsContainer = document.getElementById('topics-container'), noTopicsMessage = document.getElementById('no-topics-message');
+        const exportBtn = document.getElementById('export-btn'), importFile = document.getElementById('import-file');
 
-        // Subjects View Elements
-        const addSubjectForm = document.getElementById('add-subject-form'), subjectNameInput = document.getElementById('subject-name-input');
-        const subjectsContainer = document.getElementById('subjects-container'), noSubjectsMessage = document.getElementById('no-subjects-message');
-
-        // Chapters View Elements
-        const backToSubjectsBtn = document.getElementById('back-to-subjects-btn'), currentSubjectName = document.getElementById('current-subject-name');
-        const addChapterForm = document.getElementById('add-chapter-form'), chapterNameInput = document.getElementById('chapter-name-input');
-        const chaptersContainer = document.getElementById('chapters-container'), noChaptersMessage = document.getElementById('no-chapters-message');
-
-        // --- UI / View Management ---
+        // --- View Management ---
         function setView(viewName) {
             currentView = viewName;
-            subjectsView.classList.toggle('hidden', viewName !== 'subjects');
-            chaptersView.classList.toggle('hidden', viewName !== 'chapters');
+            ['subjects', 'chapters', 'topics'].forEach(v => {
+                document.getElementById(`${v}-view`).classList.toggle('hidden', viewName !== v);
+                if (unsubscribe[v]) unsubscribe[v]();
+            });
 
-            if (viewName === 'subjects') {
-                currentSubject = { id: null, name: null };
-                if (unsubscribeChapters) unsubscribeChapters(); // Stop listening to old chapters
-                listenForSubjects();
-            } else if (viewName === 'chapters') {
-                if (unsubscribeSubjects) unsubscribeSubjects(); // Stop listening to subjects
-                currentSubjectName.textContent = currentSubject.name;
-                listenForChapters();
-            }
-             lucide.createIcons();
+            if (viewName === 'subjects') listenForSubjects();
+            if (viewName === 'chapters') listenForChapters();
+            if (viewName === 'topics') listenForTopics();
+            lucide.createIcons();
         }
 
         // --- Authentication ---
-        onAuthStateChanged(auth, user => {
-            if (user) { /* existing auth logic */
-                authFlow.classList.remove('hidden'); mainApp.classList.add('hidden');
-                loader.classList.remove('hidden'); loginScreen.classList.add('hidden'); pendingScreen.classList.add('hidden');
-                checkUserApproval(user);
-            } else { /* existing auth logic */
-                authFlow.classList.remove('hidden'); mainApp.classList.add('hidden');
-                loginScreen.classList.remove('hidden'); loader.classList.add('hidden'); pendingScreen.classList.add('hidden');
-                if (unsubscribeSubjects) unsubscribeSubjects();
-                if (unsubscribeChapters) unsubscribeChapters();
-            }
+        onAuthStateChanged(auth, user => { /* existing auth logic */
+            if (user) { authFlow.classList.remove('hidden'); mainApp.classList.add('hidden'); loader.classList.remove('hidden'); loginScreen.classList.add('hidden'); pendingScreen.classList.add('hidden'); checkUserApproval(user); } 
+            else { authFlow.classList.remove('hidden'); mainApp.classList.add('hidden'); loginScreen.classList.remove('hidden'); loader.classList.add('hidden'); pendingScreen.classList.add('hidden'); Object.values(unsubscribe).forEach(u => u && u()); }
         });
-
-        async function checkUserApproval(user) {
+        async function checkUserApproval(user) { /* existing check logic */
             const docSnap = await getDoc(doc(db, "approvedUsers", user.email));
-            if (docSnap.exists()) {
-                userEmailDisplay.textContent = user.email;
-                authFlow.classList.add('hidden');
-                mainApp.classList.remove('hidden');
-                setView('subjects');
-            } else {
-                loader.classList.add('hidden'); pendingScreen.classList.remove('hidden');
-            }
+            if (docSnap.exists()) { userEmailDisplay.textContent = user.email; authFlow.classList.add('hidden'); mainApp.classList.remove('hidden'); setView('subjects'); } 
+            else { loader.classList.add('hidden'); pendingScreen.classList.remove('hidden'); }
         }
-        
         const handleSignOut = () => signOut(auth);
         loginBtn.addEventListener('click', () => signInWithPopup(auth, new GoogleAuthProvider()));
         logoutBtnPending.addEventListener('click', handleSignOut);
@@ -164,91 +134,137 @@
 
         // --- Firestore Logic ---
         const collabCollectionRef = collection(db, "collabData");
+        const createQuery = (type, parentId = null) => query(collabCollectionRef, where("type", "==", type), where("parentId", "==", parentId), orderBy("createdAt", "asc"));
 
-        // Listen for Subjects
         function listenForSubjects() {
-            const subjectsQuery = query(collabCollectionRef, where("type", "==", "subject"), orderBy("createdAt", "asc"));
-            unsubscribeSubjects = onSnapshot(subjectsQuery, snapshot => {
+            unsubscribe.subjects = onSnapshot(createQuery('subject'), snapshot => {
                 noSubjectsMessage.classList.toggle('hidden', !snapshot.empty);
-                subjectsContainer.innerHTML = snapshot.docs.map(doc => {
-                    const subject = doc.data();
-                    return `
-                        <div data-id="${doc.id}" data-name="${escapeHTML(subject.name)}" class="subject-card clickable-card bg-white p-5 rounded-xl shadow-md flex justify-between items-center">
-                            <div class="flex items-center"><div class="bg-indigo-100 p-3 rounded-lg mr-4"><i data-lucide="book-open" class="h-6 w-6 text-indigo-600"></i></div><h3 class="text-lg font-semibold">${escapeHTML(subject.name)}</h3></div>
-                            <button data-id="${doc.id}" class="delete-btn text-gray-400 hover:text-red-500 p-2 rounded-full transition"><i data-lucide="trash-2" class="h-5 w-5"></i></button>
-                        </div>`;
-                }).join('');
+                subjectsContainer.innerHTML = snapshot.docs.map(doc => `<div data-id="${doc.id}" data-name="${escapeHTML(doc.data().name)}" class="subject-card clickable-card bg-white p-5 rounded-xl shadow-md flex justify-between items-center"> <div class="flex items-center"><div class="bg-indigo-100 p-3 rounded-lg mr-4"><i data-lucide="book-open" class="h-6 w-6 text-indigo-600"></i></div><h3 class="text-lg font-semibold">${escapeHTML(doc.data().name)}</h3></div> <button data-id="${doc.id}" class="delete-btn text-gray-400 hover:text-red-500 p-2 rounded-full transition"><i data-lucide="trash-2" class="h-5 w-5"></i></button> </div>`).join('');
                 lucide.createIcons();
             });
         }
-        
-        // Listen for Chapters
         function listenForChapters() {
-            const chaptersQuery = query(collabCollectionRef, where("type", "==", "chapter"), where("parentId", "==", currentSubject.id), orderBy("createdAt", "asc"));
-            unsubscribeChapters = onSnapshot(chaptersQuery, snapshot => {
+            currentSubjectName.textContent = currentSubject.name;
+            unsubscribe.chapters = onSnapshot(createQuery('chapter', currentSubject.id), snapshot => {
                 noChaptersMessage.classList.toggle('hidden', !snapshot.empty);
-                chaptersContainer.innerHTML = snapshot.docs.map(doc => {
-                    const chapter = doc.data();
-                    return `
-                        <div class="bg-white p-4 rounded-lg shadow-sm flex justify-between items-center">
-                             <div class="flex items-center"><div class="bg-gray-100 p-2 rounded-lg mr-4"><i data-lucide="file-text" class="h-5 w-5 text-gray-600"></i></div><h4 class="font-medium">${escapeHTML(chapter.name)}</h4></div>
-                            <button data-id="${doc.id}" class="delete-btn text-gray-400 hover:text-red-500 p-2 rounded-full transition"><i data-lucide="trash-2" class="h-5 w-5"></i></button>
-                        </div>`;
-                }).join('');
+                chaptersContainer.innerHTML = snapshot.docs.map(doc => `<div data-id="${doc.id}" data-name="${escapeHTML(doc.data().name)}" class="chapter-card clickable-card bg-white p-5 rounded-xl shadow-md flex justify-between items-center"> <div class="flex items-center"><div class="bg-gray-100 p-3 rounded-lg mr-4"><i data-lucide="file-text" class="h-6 w-6 text-gray-600"></i></div><h4 class="text-lg font-semibold">${escapeHTML(doc.data().name)}</h4></div> <button data-id="${doc.id}" class="delete-btn text-gray-400 hover:text-red-500 p-2 rounded-full transition"><i data-lucide="trash-2" class="h-5 w-5"></i></button> </div>`).join('');
                 lucide.createIcons();
             });
+        }
+        function listenForTopics() {
+            currentChapterName.textContent = currentChapter.name;
+            breadcrumbs.innerHTML = `<button data-view="subjects" class="hover:underline">Subjects</button><span class="mx-2">/</span><button data-view="chapters" data-subjectid="${currentSubject.id}" data-subjectname="${currentSubject.name}" class="hover:underline">${currentSubject.name}</button>`;
+            unsubscribe.topics = onSnapshot(createQuery('topic', currentChapter.id), snapshot => {
+                noTopicsMessage.classList.toggle('hidden', !snapshot.empty);
+                topicsContainer.innerHTML = snapshot.docs.map(doc => renderTopic(doc.id, doc.data())).join('');
+                lucide.createIcons();
+            });
+        }
+
+        // --- Content Rendering ---
+        function renderTopic(id, data) {
+            return `<div class="bg-white p-6 rounded-lg shadow-sm"> <div class="flex justify-between items-start mb-4"><h4 class="text-xl font-bold">${escapeHTML(data.name)}</h4><button data-id="${id}" class="delete-btn text-gray-400 hover:text-red-500 p-2 rounded-full transition -mt-2 -mr-2"><i data-lucide="trash-2" class="h-5 w-5"></i></button></div> ${renderContent(data.content)} </div>`;
+        }
+        function renderContent(content) {
+            const youtubeId = getYoutubeId(content);
+            if (youtubeId) {
+                return `<div class="aspect-w-16 aspect-h-9"><iframe src="https://www.youtube.com/embed/${youtubeId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="w-full h-full rounded-lg"></iframe></div>`;
+            } else if (content.startsWith('http')) {
+                return `<a href="${escapeHTML(content)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center bg-blue-100 text-blue-700 font-semibold py-2 px-4 rounded-lg hover:bg-blue-200 transition"><i data-lucide="link" class="h-4 w-4 mr-2"></i>${escapeHTML(content)}</a>`;
+            } else {
+                return `<p class="text-gray-700 whitespace-pre-wrap">${escapeHTML(content)}</p>`;
+            }
+        }
+        function getYoutubeId(url) {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
         }
 
         // --- Event Listeners ---
+        addSubjectForm.addEventListener('submit', e => { e.preventDefault(); const name = subjectNameInput.value.trim(); if (name) { addDoc(collabCollectionRef, { name, type: 'subject', parentId: null, createdAt: serverTimestamp() }); subjectNameInput.value = ''; } });
+        addChapterForm.addEventListener('submit', e => { e.preventDefault(); const name = chapterNameInput.value.trim(); if (name && currentSubject.id) { addDoc(collabCollectionRef, { name, type: 'chapter', parentId: currentSubject.id, createdAt: serverTimestamp() }); chapterNameInput.value = ''; } });
+        addTopicForm.addEventListener('submit', e => { e.preventDefault(); const name = topicNameInput.value.trim(); const content = topicContentInput.value.trim(); if (name && content && currentChapter.id) { addDoc(collabCollectionRef, { name, content, type: 'topic', parentId: currentChapter.id, createdAt: serverTimestamp() }); addTopicForm.reset(); } });
 
-        // Add Subject
-        addSubjectForm.addEventListener('submit', async e => {
-            e.preventDefault();
-            const subjectName = subjectNameInput.value.trim();
-            if (subjectName) {
-                await addDoc(collabCollectionRef, { name: subjectName, type: 'subject', parentId: null, createdAt: serverTimestamp() });
-                subjectNameInput.value = '';
-            }
+        subjectsContainer.addEventListener('click', e => { const card = e.target.closest('.subject-card'); if (card && !e.target.closest('.delete-btn')) { currentSubject = { id: card.dataset.id, name: card.dataset.name }; setView('chapters'); } });
+        chaptersContainer.addEventListener('click', e => { const card = e.target.closest('.chapter-card'); if (card && !e.target.closest('.delete-btn')) { currentChapter = { id: card.dataset.id, name: card.dataset.name }; setView('topics'); } });
+        backToSubjectsBtn.addEventListener('click', () => { currentSubject = {}; setView('subjects'); });
+        breadcrumbs.addEventListener('click', e => {
+            const target = e.target.closest('button');
+            if (!target) return;
+            const view = target.dataset.view;
+            if (view === 'subjects') { setView('subjects'); }
+            if (view === 'chapters') { currentSubject = { id: target.dataset.subjectid, name: target.dataset.subjectname }; setView('chapters'); }
         });
 
-        // Add Chapter
-        addChapterForm.addEventListener('submit', async e => {
-            e.preventDefault();
-            const chapterName = chapterNameInput.value.trim();
-            if (chapterName && currentSubject.id) {
-                await addDoc(collabCollectionRef, { name: chapterName, type: 'chapter', parentId: currentSubject.id, createdAt: serverTimestamp() });
-                chapterNameInput.value = '';
-            }
-        });
-
-        // Navigate to Chapters View
-        subjectsContainer.addEventListener('click', e => {
-            const card = e.target.closest('.subject-card');
-            if (card && !e.target.closest('.delete-btn')) { // Navigate if not clicking delete
-                currentSubject.id = card.dataset.id;
-                currentSubject.name = card.dataset.name;
-                setView('chapters');
-            }
-        });
-
-        // Go back to Subjects view
-        backToSubjectsBtn.addEventListener('click', () => setView('subjects'));
-
-        // Handle ALL delete buttons (delegated)
         mainApp.addEventListener('click', async e => {
             const deleteButton = e.target.closest('.delete-btn');
-            if (deleteButton) {
-                const docId = deleteButton.dataset.id;
-                // A better UI would use a custom modal, but confirm is fine for now
-                if (confirm('Are you sure you want to delete this item? This cannot be undone.')) {
-                    await deleteDoc(doc(db, "collabData", docId));
-                }
+            if (deleteButton && confirm('Are you sure? Deleting this will also delete all items inside it.')) {
+                const idToDelete = deleteButton.dataset.id;
+                const batch = writeBatch(db);
+                // Simple cascade delete for demo. For very large trees, a Cloud Function is better.
+                const childrenQuery1 = query(collabCollectionRef, where('parentId', '==', idToDelete));
+                const children1 = await getDocs(childrenQuery1);
+                children1.forEach(async (doc1) => {
+                    const childrenQuery2 = query(collabCollectionRef, where('parentId', '==', doc1.id));
+                    const children2 = await getDocs(childrenQuery2);
+                    children2.forEach(doc2 => batch.delete(doc2.ref));
+                    batch.delete(doc1.ref);
+                });
+                batch.delete(doc(db, "collabData", idToDelete));
+                await batch.commit();
             }
         });
+        
+        // --- Import/Export ---
+        exportBtn.addEventListener('click', async () => {
+            const snapshot = await getDocs(query(collabCollectionRef, orderBy('createdAt')));
+            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), createdAt: doc.data().createdAt?.toDate()?.toISOString() || null }));
+            const jsonString = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'collab_export.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        });
 
-        function escapeHTML(str) {
-            return str ? str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]) : '';
-        }
+        importFile.addEventListener('change', e => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    if (!Array.isArray(data)) throw new Error("JSON must be an array.");
+                    if (!confirm(`This will overwrite all existing data. Are you sure you want to proceed?`)) return;
+
+                    // Delete existing data
+                    const snapshot = await getDocs(collabCollectionRef);
+                    const deleteBatch = writeBatch(db);
+                    snapshot.docs.forEach(doc => deleteBatch.delete(doc.ref));
+                    await deleteBatch.commit();
+                    
+                    // Add new data
+                    const addBatch = writeBatch(db);
+                    data.forEach(item => {
+                        const { id, createdAt, ...rest } = item;
+                        const docRef = doc(db, "collabData", id); // Preserve original IDs
+                        const finalItem = { ...rest, createdAt: createdAt ? new Date(createdAt) : serverTimestamp() };
+                        addBatch.set(docRef, finalItem);
+                    });
+                    await addBatch.commit();
+                    alert('Import successful!');
+                } catch (error) {
+                    alert('Import failed. Invalid JSON file or format.\n' + error.message);
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = ''; // Reset input
+        });
+
+        function escapeHTML(str) { return str ? str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]) : ''; }
     </script>
 </body>
 </html>
