@@ -72,7 +72,7 @@
                 } else {
                     const approvedDoc = await getDoc(doc(db, "approvedUsers", user.email));
                     if (approvedDoc.exists()) {
-                        await createAutomaticProfile(user);
+                        await createAutomaticProfile(user, approvedDoc);
                     } else {
                         handleUnapprovedUser(user);
                         return;
@@ -84,11 +84,21 @@
             initializeAppLogic();
         });
         
-        async function createAutomaticProfile(user) {
+        async function createAutomaticProfile(user, approvedDoc) {
             appLoader.classList.remove('hidden');
             mainApp.classList.add('hidden');
+            
             const displayName = user.displayName || user.email.split('@')[0];
-            const newUserProfile = { email: user.email, displayName, role: 'viewer' };
+            // ** YOUR FIX IS IMPLEMENTED HERE **
+            // Check if the user has a pre-assigned role in the approvedUsers collection
+            const role = approvedDoc.exists() && approvedDoc.data().role ? approvedDoc.data().role : 'viewer';
+            
+            const newUserProfile = { 
+                email: user.email, 
+                displayName, 
+                role: role 
+            };
+
             try {
                 await setDoc(doc(db, "users", user.uid), newUserProfile);
                 currentUser = { uid: user.uid, ...newUserProfile };
@@ -325,4 +335,5 @@
     </script>
 </body>
 </html>
+
 
