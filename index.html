@@ -39,7 +39,7 @@
             <svg class="animate-spin h-10 w-10 text-indigo-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
             <p class="mt-4 text-lg font-medium">Loading Collab...</p>
         </div>
-        <!-- AUTH MODAL -->
+        <!-- AUTH MODAL for Pending Approval -->
         <div id="auth-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center p-4 z-50 modal-overlay"></div>
         <!-- MAIN APPLICATION -->
         <div id="main-app" class="hidden"></div>
@@ -49,7 +49,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, collection, doc, getDoc, setDoc, onSnapshot, addDoc, updateDoc, arrayUnion, serverTimestamp, query, where, orderBy, writeBatch, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyA41QF5OwtZpiMKnkbr8BPMUokkhqLbLew", authDomain: "collab-871ae.firebaseapp.com", projectId: "collab-871ae", storageBucket: "collab-871ae.appspot.com", messagingSenderId: "616325837303", appId: "1:616325837303:web:9d81eecba230341793fef2", measurementId: "G-KHR4HWFQR" };
@@ -63,50 +63,48 @@
         let itemToDeleteId = null;
         let currentUser = null;
         let currentTagFilter = null;
-
-        // This handles the user coming back from the Google login page
-        getRedirectResult(auth)
-            .catch((error) => {
-                console.error("Login redirect error:", error);
-            });
-
+        
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const userProfileDoc = await getDoc(doc(db, "users", user.uid));
-                if (userProfileDoc.exists() && userProfileDoc.data().displayName) {
+                if (userProfileDoc.exists()) {
                     currentUser = { uid: user.uid, ...userProfileDoc.data() };
+                    initializeAppLogic();
                 } else {
                     const approvedDoc = await getDoc(doc(db, "approvedUsers", user.email));
                     if (approvedDoc.exists()) {
-                        promptForDisplayName(user);
-                        return; 
+                        // ** FIX IMPLEMENTED HERE **
+                        // Automatically create profile for approved users on first login
+                        createAutomaticProfile(user);
                     } else {
                         showPendingApproval(user);
-                        return;
                     }
                 }
             } else {
                 currentUser = null;
+                initializeAppLogic();
             }
-            initializeAppLogic();
         });
         
-        function promptForDisplayName(user) {
-            appLoader.classList.add('hidden');
-            authModal.classList.remove('hidden');
-            authModal.innerHTML = `<div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md modal-content"><h2 class="text-xl font-bold text-gray-900">Welcome! Choose a Display Name</h2><p class="mt-2 text-gray-600">This name will be visible to other collaborators. An admin will grant you reviewer access shortly.</p><form id="display-name-form" class="mt-4 space-y-4"><input type="text" id="display-name-input" placeholder="Your Name" required class="w-full p-3 border border-gray-300 rounded-lg form-input"><button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition">Save and Continue</button></form></div>`;
-            document.getElementById('display-name-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const displayName = document.getElementById('display-name-input').value.trim();
-                if (displayName) {
-                    const newUserProfile = { email: user.email, displayName, role: 'viewer' };
-                    await setDoc(doc(db, "users", user.uid), newUserProfile);
-                    authModal.innerHTML = '';
-                    authModal.classList.add('hidden');
-                    currentUser = { uid: user.uid, ...newUserProfile };
-                    initializeAppLogic();
-                }
-            });
+        async function createAutomaticProfile(user) {
+            appLoader.classList.remove('hidden');
+            mainApp.classList.add('hidden');
+            
+            const displayName = user.displayName || user.email.split('@')[0];
+            const newUserProfile = { 
+                email: user.email, 
+                displayName: displayName, 
+                role: 'viewer' 
+            };
+            
+            try {
+                await setDoc(doc(db, "users", user.uid), newUserProfile);
+                currentUser = { uid: user.uid, ...newUserProfile };
+                initializeAppLogic();
+            } catch (err) {
+                console.error("Error creating user profile:", err);
+                showPendingApproval(user); // Fallback to showing an error/pending state
+            }
         }
 
         function showPendingApproval(user) {
@@ -277,7 +275,7 @@
 
             mainApp.addEventListener('click', e => {
                 if(e.target.closest('#logout-btn-main')) { signOut(auth); return; }
-                if(e.target.closest('#login-btn-main')) { const provider = new GoogleAuthProvider(); signInWithRedirect(auth, provider); return; }
+                if(e.target.closest('#login-btn-main')) { const provider = new GoogleAuthProvider(); signInWithPopup(auth, provider).catch(err => { console.error("Popup Error:", err); }); return; }
                 
                 const subjectCard = e.target.closest('.subject-card');
                 const chapterCard = e.target.closest('.chapter-card');
