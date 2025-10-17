@@ -63,11 +63,10 @@
         let currentUser = null;
         let currentTagFilter = null;
         
-        // Handle the redirect result when the page loads
         getRedirectResult(auth)
             .then((result) => {
                 if (result) {
-                    // User just signed in. The onAuthStateChanged will handle the rest.
+                    // User just signed in. onAuthStateChanged will handle the logic.
                 }
             }).catch((error) => {
                 console.error("Login redirect error:", error);
