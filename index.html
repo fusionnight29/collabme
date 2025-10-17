@@ -43,7 +43,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth..js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, collection, doc, getDoc, setDoc, onSnapshot, addDoc, updateDoc, arrayUnion, serverTimestamp, query, where, orderBy, writeBatch, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyA41QF5OwtZpiMKnkbr8BPMUokkhqLbLew", authDomain: "collab-871ae.firebaseapp.com", projectId: "collab-871ae", storageBucket: "collab-871ae.appspot.com", messagingSenderId: "616325837303", appId: "1:616325837303:web:9d81eecba230341793fef2", measurementId: "G-KHR4HWFQR" };
@@ -169,6 +169,8 @@
 
             setView('subjects');
         }
+
+        function escapeHTML(str) { return str ? String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]) : ''; }
     </script>
 </body>
 </html>
